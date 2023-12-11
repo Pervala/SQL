@@ -56,3 +56,28 @@ Function getGenreID(GenreName As String)
     dbConnection.Close
     
 End Function
+//output of genre information
+Sub getBooksWithGenre(ByVal GenreId As String, ByRef aListOfBooks As Object)
+
+
+    Dim dbConnection As Object
+    Dim recordSet As Object
+    Dim strSQL As String
+    Dim strConnection As String
+    Set dbConnection = CreateObject("ADODB.Connection")
+    strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;" & "Data Source = " & Application.ActiveWorkbook.Path & "\BooksDatabase.accdb"
+    strSQL = "SELECT BookName From Books WHERE GID = '" & GenreId & "';"
+    dbConnection.Open (strConnection)
+    Set recordSet = dbConnection.Execute(strSQL)
+    
+    Dim getGenreBook As String
+    Do While (Not recordSet.EOF)
+        getGenreBook = recordSet.Fields(0)
+        aListOfBooks.Add (getGenreBook)
+        recordSet.MoveNext
+    
+    Loop
+    
+    recordSet.Close
+    dbConnection.Close
+End Sub
