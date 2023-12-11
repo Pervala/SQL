@@ -1,1 +1,44 @@
+//Book Information dialouge box
+Sub getBookInfo(Control As IRibbonControl)
 
+    Dim BookName As String
+    BookName = InputBox("Enter a Book Name.")
+    
+    Dim BookInfo As String
+    BookInfo = getBookInformation(BookName)
+    
+    If BookInfo = "" Then
+    
+    Else
+        MsgBox ("Book Info " & BookName & ": " & BookInfo)
+    End If
+    
+End Sub
+//accesing Database
+
+Function getBookInformation(ByVal BookName As String) As String
+
+    Dim dbConnection As Object
+    Dim recordSet As Object
+    Dim strConnection As String
+    Dim strSQL As String
+    
+    Set dbConnection = CreateObject("ADODB.Connection")
+    strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;" & "Data Source = " & Application.ActiveWorkbook.Path & "\BooksDatabase.accdb"
+    
+    strSQL = "SELECT Books.BookID, Genre.GenreName, Books.PublicationDate, Books.PageCount, Authors.AuthorName FROM Books, Genre, Authors WHERE Genre.GenreID = Books.GID AND Authors.AuthorID = Books.AID AND Books.BookName =  '" & BookName & "';"
+    
+    dbConnection.Open (strConnection)
+    Set recordSet = dbConnection.Execute(strSQL)
+    
+    If recordSet.EOF = False Then
+        getBookInformation = recordSet.Fields(0) & " | " & recordSet.Fields(1) & " | " & recordSet.Fields(2) & " | " & recordSet.Fields(3) & " | " & recordSet.Fields(4) & ""
+    Else
+        MsgBox ("BookName: " & BookName & " does not exist.")
+        getBookInformation = ""
+    End If
+    
+    recordSet.Close
+    dbConnection.Close
+
+End Function
