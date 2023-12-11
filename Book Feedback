@@ -1,0 +1,92 @@
+//Creating a dropdown menu for books and creating a feedback box
+Private Sub UserForm_Initialize()
+
+Dim dbConnection As Object
+Dim recordSet As Object
+Dim strSQL As String
+Dim strConnection As String
+
+Set dbConnection = CreateObject("ADODB.Connection")
+strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " & Application.ActiveWorkbook.Path & "\BooksDatabase.accdb"
+
+strSQL = "SELECT BookName FROM Books ORDER BY BookName ASC"
+
+dbConnection.Open (strConnection)
+Set recordSet = dbConnection.Execute(strSQL)
+
+Dim Book As String
+Do While (Not recordSet.EOF)
+
+    Book = recordSet.Fields(0)
+    BookNameCB.AddItem (Book)
+    recordSet.MoveNext
+    
+Loop
+
+recordSet.Close
+dbConnection.Close
+
+Dim i As Integer
+i = 0
+For i = 0 To 10
+    UserFeedbackCB.AddItem (i)
+Next
+
+End Sub
+//Users feebback will be entering in to the database on that particular book and User recieves the count and average feedback given by other users
+Private Sub SubmitFeedbackBT_Click()
+
+Dim dbConnection As Object
+Dim recordSet As Object
+Dim strSQL As String
+Dim strConnection As String
+
+Set dbConnection = CreateObject("ADODB.Connection")
+strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " & Application.ActiveWorkbook.Path & "\BooksDatabase.accdb"
+
+strSQL = "SELECT BookID FROM Books WHERE BookName= '" & BookNameCB & "'"
+
+dbConnection.Open (strConnection)
+Set recordSet = dbConnection.Execute(strSQL)
+
+Dim Book As String
+Do While (Not recordSet.EOF)
+
+    Book = recordSet.Fields(0)
+    recordSet.MoveNext
+    
+Loop
+
+
+recordSet.Close
+
+strSQL = "INSERT INTO UserFeedback VALUES ('" & Book & "'," & UserFeedbackCB & ")"
+
+dbConnection.Execute (strSQL)
+
+
+strSQL = "SELECT AVG(UserFeedback),COUNT(*) FROM UserFeedback Where BookID = '" & Book & "'"
+
+Set recordSet = dbConnection.Execute(strSQL)
+
+Dim AvgScore As String
+Dim Likes As String
+
+Do While (Not recordSet.EOF)
+    
+    AvgScore = recordSet.Fields(0)
+    Likes = recordSet.Fields(1)
+    recordSet.MoveNext
+
+Loop
+
+recordSet.Close
+
+MsgBox ("Average Score from Users: " & AvgScore & " (" & Likes & " Likes)")
+
+BookNameCB.Text = ""
+UserFeedbackCB.Text = ""
+
+dbConnection.Close
+
+End Sub
