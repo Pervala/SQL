@@ -1,1 +1,81 @@
+//Author dialouge box
+Sub getBooksByAuthor(Control As IRibbonControl)
 
+    Dim AuthorName As String
+    AuthorName = InputBox("Enter the Author Name You are serching for :-")
+    
+    Dim AuthorId As String
+    AuthorId = getAuthorID(AuthorName)
+    
+    If AuthorId = "" Then
+        MsgBox ("No Books Find with provided Author Name")
+    Else:
+        MsgBox (AuthorId)
+    End If
+    
+    Dim aListOfBooks As Object
+    Set aListOfBooks = CreateObject("System.Collections.ArrayList")
+    
+    Call getBooksWithAuthorName(AuthorId, aListOfBooks)
+
+    If aListOfBooks.Count = 0 Then
+        MsgBox ("None")
+    End If
+    
+    Dim i As Integer
+    For i = 1 To aListOfBooks.Count
+        MsgBox (aListOfBooks.Item(i - 1))
+    
+    Next
+
+End Sub
+//Taking Input from the user
+Function getAuthorID(AuthorName As String)
+
+    Dim dbConnection As Object
+    Dim recordSet As Object
+    Dim strConnection As String
+    Dim strSQL As String
+    
+    Set dbConnection = CreateObject("ADODB.Connection")
+    strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;" & "Data Source = " & Application.ActiveWorkbook.Path & "\BooksDatabase.accdb"
+    
+    strSQL = "SELECT AuthorID From Authors WHERE AuthorName = '" & AuthorName & "';"
+    
+    dbConnection.Open (strConnection)
+    Set recordSet = dbConnection.Execute(strSQL)
+    If recordSet.EOF = False Then
+        getAuthorID = recordSet.Fields(0)
+    Else
+        MsgBox ("AuthorName: " & AuthorName & " does not exist.")
+        getAuthorID = ""
+    End If
+    
+    recordSet.Close
+    dbConnection.Close
+End Function
+//Output of author information
+Sub getBooksWithAuthorName(ByVal AuthorId As String, ByRef aListOfBooks As Object)
+
+
+    Dim dbConnection As Object
+    Dim recordSet As Object
+    Dim strSQL As String
+    Dim strConnection As String
+    Set dbConnection = CreateObject("ADODB.Connection")
+    strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;" & "Data Source = " & Application.ActiveWorkbook.Path & "\BooksDatabase.accdb"
+    strSQL = "SELECT BookName From Books WHERE AID = '" & AuthorId & "';"
+    dbConnection.Open (strConnection)
+    Set recordSet = dbConnection.Execute(strSQL)
+    
+    Dim getGenreBook As String
+    Do While (Not recordSet.EOF)
+        getGenreBook = recordSet.Fields(0)
+        aListOfBooks.Add (getGenreBook)
+        recordSet.MoveNext
+    
+    Loop
+    
+    recordSet.Close
+    dbConnection.Close
+End Sub
