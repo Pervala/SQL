@@ -1,0 +1,29 @@
+//Creating feature 
+Sub getBooksByFavouriteBooks(Control As IRibbonControl)
+
+getBooksByFavouriteBooks.Show
+
+End Sub
+//Give favourite books based on the average rating
+Function getFavouriteBooks(BookName) As String
+
+    Dim dbConnection As Object
+    Dim recordSet As Object
+    Dim strConnection As String
+    Dim strSQL As String
+    
+    Set dbConnection = CreateObject("ADODB.Connection")
+    strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;" & "Data Source = " & Application.ActiveWorkbook.Path & "\BooksDatabase.accdb"
+    strSQL = "SELECT BookName FROM Books WHERE InternetFeedback>='6'"
+    dbConnection.Open (strConnection)
+    Set recordSet = dbConnection.Execute(strSQL)
+
+    Do While (Not recordSet.EOF)
+       MsgBox (recordSet.Fields(0))
+       recordSet.MoveNext
+    Loop
+
+    recordSet.Close
+    dbConnection.Close
+
+End Function
